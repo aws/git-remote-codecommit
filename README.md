@@ -65,7 +65,7 @@ aws_access_key_id = AKIAIOSFODNN7EXAMPLE
 aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 ```
 
-# Step 3: Install git-remote-codecommit
+## Step 3: Install git-remote-codecommit
 
 1. On your Linux, macOS, or Unix computer, install git-remote-codecommit using the  **pip** command. For example:
 ```
