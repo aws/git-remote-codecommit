@@ -25,14 +25,23 @@ general commercial release and may contain bugs, errors, or defects. It is
 provided "AS IS."** We welcome users who want to give this a try and request
 that you report any issues you encounter.
 
-#Prerequisites
+# Prerequisites
+
 Before you can use git-remote-codecommit, you must:
 + Complete initial configuration for AWS CodeCommit, including creating an AWS account, configuring an IAM user with an access key ID and a secret access key associated with that IAM user, and attaching a policy (or equivalent permissions) to that user that allows access to AWS CodeCommit repositories. You can find instructions for these steps [here](https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-https-unixes.html#setting-up-https-unixes-account).
 + Create an AWS CodeCommit repository, or have one already in your AWS account.
 + Install Git on your Linux, macOS, or Unix computer. (At this time, git-remote-codecommit is not compatible with Windows operating systems.)
 + Install the latest version of the AWS CLI on your Linux, macOS, or Unix computer. You can find instructions [here](https://docs.aws.amazon.com/cli/latest/userguide/installing.html).
 
-
+Note: Installation of the AWS CLI on some operating systems requires pip version 9.0.3 or later. To check your version of pip, open a terminal and type the following command:
+```
+pip --version
+```
+If the version is not 9.0.3 or later, run the following commands to update your version of pip:
+```
+$ curl -O https://bootstrap.pypa.io/get-pip.py
+$ python3 get-pip.py --user
+```
 
 # Getting Started
 
