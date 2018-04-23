@@ -65,54 +65,53 @@ Step 1: Look Up Your AWS Account ID and IAM User Access Key
 Step 2: Configure AWS locally
 -----------------------------
 
-1. On your local computer, run the **aws configure --profile** command to create an AWS CLI profile to use with git-remote-codecommit. For example:
+1. On your local computer, run the **aws configure --profile** command to create an AWS CLI profile to use with git-remote-codecommit. When prompted, provide your AWS access key, your secret access key, the region where your AWS CodeCommit repository resides, and the default output format you prefer. For example:
 
-  ::
+::
 
-    aws configure --profile GRCProfile
+  aws configure --profile GRCProfile
 
-  When prompted, provide your AWS access key, your secret access key, the region where your AWS CodeCommit repository resides, and the default output format you prefer.
 
 2. In a plain-text editor, open the config file, also known as the AWS CLI configuration file, and add your AWS account ID. Depending on your operating system, this file might be located at ~/.aws/config or some other location.
 
-  ::
+::
 
-    [profile GRCProfile]
-    region = us-east-2
-    account = 111122223333
+  [profile GRCProfile]
+  region = us-east-2
+  account = 111122223333
 
 3. Edit your  **~/.aws/credentials** file to verify that your access key and secret key are associated with your profile.
 
-  ::
+::
 
-    [GRCProfile]
-    aws_access_key_id = AKIAIOSFODNN7EXAMPLE
-    aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
+  [GRCProfile]
+  aws_access_key_id = AKIAIOSFODNN7EXAMPLE
+  aws_secret_access_key = wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
 
 Step 3: Install git-remote-codecommit
 -------------------------------------
 
 1. On your Linux, macOS, or Unix computer, install git-remote-codecommit using the  **pip** command. For example:
 
-  ::
+::
 
-    % sudo pip install git-remote-codecommit
+  % sudo pip install git-remote-codecommit
 
 2. If you already have git-remote-codecommit installed you can upgrade to the latest version with the **--upgrade** parameter:
 
-  ::
+::
 
-    % sudo pip install --upgrade git-remote-codecommit
+  % sudo pip install --upgrade git-remote-codecommit
 
 Step 4: Clone your repository
 -----------------------------
 
 1. At the terminal, run the **git clone codecommit** command, using the name of your profile and the name of your repository. For example:
 
-  ::
+::
 
-    % git clone codecommit://GRCProfile@MyRepositoryName
-    Cloning into 'MyRepositoryName'...
-    warning: You appear to have cloned an empty repository.
-    Checking connectivity... done.
+  % git clone codecommit://GRCProfile@MyRepositoryName
+  Cloning into 'MyRepositoryName'...
+  warning: You appear to have cloned an empty repository.
+  Checking connectivity... done.
 
