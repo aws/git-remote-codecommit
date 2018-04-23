@@ -11,7 +11,7 @@ setuptools.setup(
   packages = ['git_remote_codecommit'],
   version = '0.2',
   description = 'Git remote prefix to simplify pushing to and pulling from CodeCommit.',
-  long_description = read('README.md'),
+  long_description = read('README.rst'),
   author = 'Amazon Web Services',
   url = 'https://github.com/awslabs/git-remote-codecommit',
   license = 'Apache License 2.0',
