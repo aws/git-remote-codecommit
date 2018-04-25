@@ -13,6 +13,7 @@
 
 import collections
 import datetime
+import os
 import subprocess
 import sys
 
@@ -171,7 +172,7 @@ def git_url(repository, version, region, credentials):
   :return: url we can push/pull from
   """
 
-  hostname = 'git-codecommit.%s.amazonaws.com' % region
+  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.%s.amazonaws.com' % region)
   path = '/%s/repos/%s' % (version, repository)
 
   token = '%' + credentials.token if credentials.token else ''
