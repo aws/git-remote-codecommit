@@ -58,21 +58,21 @@ Getting Started
 Step 1: Look Up Your AWS Account ID and IAM User Access Key
 -----------------------------------------------------------
 
-1. Look up and write down the account ID for your AWS account. You will need this information for git-remote-codecommit to work correctly. If you don't know how to find your AWS Account, ID, learn how `here <https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html>`__.
+* Look up and write down the account ID for your AWS account. You will need this information for git-remote-codecommit to work correctly. If you don't know how to find your AWS Account, ID, learn how `here <https://docs.aws.amazon.com/IAM/latest/UserGuide/console_account-alias.html>`__.
 
-2. Look up and write down the access key for your IAM user, if you do not already have that information stored locally. Learn more `here <https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html>`__.
+* Look up and write down the access key for your IAM user, if you do not already have that information stored locally. Learn more `here <https://docs.aws.amazon.com/IAM/latest/UserGuide/id_credentials_access-keys.html>`__.
 
 Step 2: Configure AWS locally
 -----------------------------
 
-1. On your local computer, run the **aws configure --profile** command to create an AWS CLI profile to use with git-remote-codecommit. When prompted, provide your AWS access key, your secret access key, the region where your AWS CodeCommit repository resides, and the default output format you prefer. For example:
+* On your local computer, run the **aws configure --profile** command to create an AWS CLI profile to use with git-remote-codecommit. When prompted, provide your AWS access key, your secret access key, the region where your AWS CodeCommit repository resides, and the default output format you prefer. For example:
 
 ::
 
   aws configure --profile GRCProfile
 
 
-2. In a plain-text editor, open the config file, also known as the AWS CLI configuration file, and add your AWS account ID. Depending on your operating system, this file might be located at ~/.aws/config or some other location.
+* In a plain-text editor, open the config file, also known as the AWS CLI configuration file, and add your AWS account ID. Depending on your operating system, this file might be located at ~/.aws/config or some other location.
 
 ::
 
@@ -80,7 +80,7 @@ Step 2: Configure AWS locally
   region = us-east-2
   account = 111122223333
 
-3. Edit your  **~/.aws/credentials** file to verify that your access key and secret key are associated with your profile.
+* Edit your  **~/.aws/credentials** file to verify that your access key and secret key are associated with your profile.
 
 ::
 
@@ -91,13 +91,13 @@ Step 2: Configure AWS locally
 Step 3: Install git-remote-codecommit
 -------------------------------------
 
-1. On your Linux, macOS, or Unix computer, install git-remote-codecommit using the  **pip** command. For example:
+* On your Linux, macOS, or Unix computer, install git-remote-codecommit using the  **pip** command. For example:
 
 ::
 
   % sudo pip install git-remote-codecommit
 
-2. If you already have git-remote-codecommit installed you can upgrade to the latest version with the **--upgrade** parameter:
+* If you already have git-remote-codecommit installed you can upgrade to the latest version with the **--upgrade** parameter:
 
 ::
 
@@ -106,7 +106,7 @@ Step 3: Install git-remote-codecommit
 Step 4: Clone your repository
 -----------------------------
 
-1. At the terminal, run the **git clone codecommit** command, using the name of your profile and the name of your repository. For example:
+* At the terminal, run the **git clone codecommit** command, using the name of your profile and the name of your repository. For example:
 
 ::
 
