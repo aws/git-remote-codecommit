@@ -4,7 +4,13 @@ git-remote-codecommit
 This package provides a simple method for pushing and pulling from `AWS
 CodeCommit <https://aws.amazon.com/codecommit/>`__. This package extends `git
 <https://git-scm.com/>`__ to support repository urls prefixed with
-**codecommit://**. For example, if using IAM...
+**codecommit://** by implementing a custom `git-remote-helper 
+<https://git-scm.com/docs/git-remote-helpers>`_.
+This custom helper enables your local ``git`` to access your
+`AWS CodeCommit <https://aws.amazon.com/codecommit/>`__
+repository using a signed URL based on your credentials.
+
+For example, if using IAM...
 
 ::
 
