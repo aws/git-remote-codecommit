@@ -28,6 +28,7 @@ try:
 except ImportError:
   from urllib.parse import urlparse  # python 3.x
 
+
 class FormatError(Exception):
   pass
 
@@ -107,9 +108,9 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       import awscli.plugin
 
       awscli.plugin.load_plugins(
-        session.full_config.get('plugins', {}),
-        event_hooks = event_handler,
-        include_builtins = False,
+          session.full_config.get('plugins', {}),
+          event_hooks = event_handler,
+          include_builtins = False,
       )
 
       session.emit_first_non_none_response('session-initialized', session = session)

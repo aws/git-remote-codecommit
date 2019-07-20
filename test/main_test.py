@@ -11,7 +11,6 @@
 # ANY KIND, either express or implied. See the License for the specific
 # language governing permissions and limitations under the License.
 
-import collections
 import pytest
 import sys
 
@@ -71,10 +70,10 @@ def test_main_with_exceptions():
   # We check for quite a few issues. In those cases we provide a nice stderr message.
 
   recognized_exceptions = (
-    git_remote_codecommit.FormatError,
-    git_remote_codecommit.ProfileNotFound,
-    git_remote_codecommit.RegionNotFound,
-    git_remote_codecommit.CredentialsNotFound,
+      git_remote_codecommit.FormatError,
+      git_remote_codecommit.ProfileNotFound,
+      git_remote_codecommit.RegionNotFound,
+      git_remote_codecommit.CredentialsNotFound,
   )
 
   for exception_type in recognized_exceptions:

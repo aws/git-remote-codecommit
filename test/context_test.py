@@ -77,14 +77,14 @@ def test_with_profile_and_region():
 
 def test_with_malformed_url():
   malformed_urls = (
-    '',
-    'boom',
-    'codecommit:/test_repo',    # missing a slash
-    'codecommit//test_repo',    # missing colon
-    '://test_repo',             # missing protocol
-    'codecommit://',            # missing repository
-    'codecommit:://test_repo',  # extra colon
-    'codecommit:///test_repo',  # extra slash
+      '',
+      'boom',
+      'codecommit:/test_repo',    # missing a slash
+      'codecommit//test_repo',    # missing colon
+      '://test_repo',             # missing protocol
+      'codecommit://',            # missing repository
+      'codecommit:://test_repo',  # extra colon
+      'codecommit:///test_repo',  # extra slash
   )
 
   for url in malformed_urls:

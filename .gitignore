@@ -1,0 +1,5 @@
+/.tox
+/.vscode
+/git_remote_codecommit.egg-info
+*.pyc
+__pycache__
