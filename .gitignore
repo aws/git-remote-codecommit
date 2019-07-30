@@ -3,3 +3,6 @@
 /git_remote_codecommit.egg-info
 *.pyc
 __pycache__
+/.eggs
+/dist
+/.python-version
