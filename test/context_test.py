@@ -15,18 +15,34 @@ import botocore.credentials
 import functools
 import pytest
 
-from git_remote_codecommit import Context, FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound
+
+from git_remote_codecommit import Context, FormatError, ProfileNotFound, RegionNotFound, RegionNotAvailable, CredentialsNotFound
 from mock import Mock, patch
+
 
 DEFAULT_CREDS = botocore.credentials.Credentials('access_key', 'secret_key', 'token')
 
 
+def get_available_regions(service, partition):
+  if (partition == 'aws'):
+    return ['ap-northeast-1', 'ap-northeast-2', 'ap-south-1', 'ap-southeast-1', 'ap-southeast-2', 'ca-central-1', 'us-west-2']
+  else:
+    return ['us-gov-west-1', 'us-gov-east-1']
+
+
+def get_available_partitions():
+  return ['aws', 'aws-us-gov']
+
+
 def mock_session(region = None, available_profiles = None, credentials = DEFAULT_CREDS):
+
   def decorator(func):
     session = Mock()
     session.get_config_variable.return_value = region
     session.available_profiles = available_profiles
     session.get_credentials.return_value = credentials
+    session.get_available_partitions.return_value = get_available_partitions()
+    session.get_available_regions.side_effect = get_available_regions
 
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
@@ -48,8 +64,23 @@ def test_without_profile():
   assert DEFAULT_CREDS == context.credentials
 
 
+@mock_session(region = 'zz-west-2')
+def test_with_invalid_region():
+  with pytest.raises(RegionNotAvailable):
+    Context.from_url('codecommit://test_repo')
+
+
 @mock_session(region = 'us-west-2', available_profiles = ['profile'])
 def test_with_profile():
+  context = Context.from_url('codecommit://profile@test_repo')
+  assert 'test_repo' == context.repository
+  assert 'v1' == context.version
+  assert 'us-west-2' == context.region
+  assert DEFAULT_CREDS == context.credentials
+
+
+@mock_session(region = 'us-west-2', available_profiles = ['profile', 'profile2', 'profile3', 'profile3'])
+def test_with_multiple_profiles():
   context = Context.from_url('codecommit://profile@test_repo')
   assert 'test_repo' == context.repository
   assert 'v1' == context.version
@@ -66,6 +97,36 @@ def test_with_region():
   assert DEFAULT_CREDS == context.credentials
 
 
+@mock_session()
+def test_with_bad_region():
+  with pytest.raises(RegionNotAvailable):
+    Context.from_url('yy-central-1://test_repo')
+
+
+@mock_session(region = 'us-west-2')
+def test_with_github():
+  with pytest.raises(FormatError):
+    Context.from_url('github://test_repo')
+
+
+@mock_session(region = 'us-gov-east-1')
+def test_with_gov_region():
+    context = Context.from_url('codecommit://test_repo')
+    assert 'test_repo' == context.repository
+    assert 'v1' == context.version
+    assert 'us-gov-east-1' == context.region
+    assert DEFAULT_CREDS == context.credentials
+
+
+@mock_session(available_profiles = ['profile'])
+def test_with_different_partition():
+    context = Context.from_url('us-gov-west-1://profile@repo')
+    assert 'repo' == context.repository
+    assert 'v1' == context.version
+    assert 'us-gov-west-1' == context.region
+    assert DEFAULT_CREDS == context.credentials
+
+
 @mock_session(available_profiles = ['profile'])
 def test_with_profile_and_region():
   context = Context.from_url('ca-central-1://profile@test_repo')
@@ -77,6 +138,7 @@ def test_with_profile_and_region():
 
 def test_with_malformed_url():
   malformed_urls = (
+      None,
       '',
       'boom',
       'codecommit:/test_repo',    # missing a slash

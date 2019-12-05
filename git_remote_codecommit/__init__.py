@@ -16,6 +16,7 @@ import datetime
 import os
 import subprocess
 import sys
+import re
 
 import botocore.auth
 import botocore.awsrequest
@@ -38,6 +39,10 @@ class ProfileNotFound(Exception):
 
 
 class RegionNotFound(Exception):
+  pass
+
+
+class RegionNotAvailable(Exception):
   pass
 
 
@@ -82,23 +87,25 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       * **FormatError** if the url is malformed
       * **ProfileNotFound** if the url references a profile that doesn't exist
       * **RegionNotFound** if the url references a region that doesn't exist
+      * **RegionNotAvailable** if the url references a region that is not available
     """
+    if remote_url is None:
+      raise FormatError('url required')
 
     url = urlparse(remote_url)
     event_handler = botocore.hooks.HierarchicalEmitter()
     profile = 'default'
     repository = url.netloc
-    region = url.scheme
-
     if not url.scheme or not url.netloc:
-      raise FormatError("'%s' is a malformed url" % remote_url)
+      raise FormatError(f'{remote_url} is a malformed url')
 
     if '@' in url.netloc:
       profile, repository = url.netloc.split('@', 1)
       session = botocore.session.Session(profile = profile, event_hooks = event_handler)
 
       if profile not in session.available_profiles:
-        raise ProfileNotFound('Profile %s not found, available profiles are: %s' % (profile, ', '.join(session.available_profiles)))
+        raise ProfileNotFound(f"Profile {profile} not found, available profiles are: {', '.join(session.available_profiles)}")
+
     else:
       session = botocore.session.Session(event_hooks = event_handler)
 
@@ -117,16 +124,30 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
     except ImportError:
       pass
 
+    available_regions = [region for partition in session.get_available_partitions() for region in session.get_available_regions('codecommit', partition)]
+
     if url.scheme == 'codecommit':
       region = session.get_config_variable('region')
 
       if not region:
-        raise RegionNotFound("Profile %s doesn't have a region available. Please set it." % profile)
+        raise RegionNotFound(f"Profile {profile} doesn't have a region available. Please set it.")
 
+      if region not in available_regions:
+        raise RegionNotAvailable(f'Region {region} is currently not available for use with AWS CodeCommit. Please try again with a valid region. If you believe this is an error then please update your version of botocore.')
+
+    elif re.match(r"^[a-z]{2}-\w*.*-\d{1}", url.scheme):
+      if url.scheme in available_regions:
+        region = url.scheme
+
+      else:
+        raise RegionNotAvailable(f'Region {url.scheme} is currently not available for use with AWS CodeCommit. Please try again with a valid region. If you believe this is an error then please update your version of botocore.')
+
+    else:
+      raise FormatError(f'{remote_url} is a malformed url')
     credentials = session.get_credentials()
 
     if not credentials:
-      raise CredentialsNotFound("Profile %s doesn't have credentials available." % profile)
+      raise CredentialsNotFound(f"Profile {profile} doesn't have credentials available.")
 
     return Context(session, repository, 'v1', region, credentials)
 
@@ -144,6 +165,7 @@ def main():
 
   if len(sys.argv) < 3:
     error('Too few arguments. This hook requires the git command and remote.')
+
   elif len(sys.argv) > 3:
     error("Too many arguments. Hook only accepts the git command and remote, but argv was: '%s'" % "', '".join(sys.argv))
 
@@ -153,6 +175,7 @@ def main():
     context = Context.from_url(remote_url)
     authenticated_url = git_url(context.repository, context.version, context.region, context.credentials)
     sys.exit(subprocess.call(['git', 'remote-http', git_cmd, authenticated_url]))
+
   except (FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound) as exc:
     error(str(exc))
 
@@ -173,14 +196,14 @@ def git_url(repository, version, region, credentials):
   :return: url we can push/pull from
   """
 
-  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.%s.amazonaws.com' % region)
-  path = '/%s/repos/%s' % (version, repository)
+  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', f'git-codecommit.{region}.amazonaws.com')
+  path = f'/{version}/repos/{repository}'
 
   token = '%' + credentials.token if credentials.token else ''
   username = botocore.compat.quote(credentials.access_key + token, safe='')
   signature = sign(hostname, path, region, credentials)
 
-  return 'https://%s:%s@%s%s' % (username, signature, hostname, path)
+  return f'https://{username}:{signature}@{hostname}{path}'
 
 
 def sign(hostname, path, region, credentials):
@@ -195,11 +218,11 @@ def sign(hostname, path, region, credentials):
   :return: signature for the url
   """
 
-  request = botocore.awsrequest.AWSRequest(method = 'GIT', url = 'https://%s%s' % (hostname, path))
+  request = botocore.awsrequest.AWSRequest(method = 'GIT', url = f'https://{hostname}{path}')
   request.context['timestamp'] = datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%S')
 
   signer = botocore.auth.SigV4Auth(credentials, 'codecommit', region)
-  canonical_request = 'GIT\n%s\n\nhost:%s\n\nhost\n' % (path, hostname)
+  canonical_request = f'GIT\n{path}\n\nhost:{hostname}\n\nhost\n'
   string_to_sign = signer.string_to_sign(request, canonical_request)
   signature = signer.signature(string_to_sign, request)
-  return '%sZ%s' % (request.context['timestamp'], signature)
+  return f"{request.context['timestamp']}Z{signature}"
