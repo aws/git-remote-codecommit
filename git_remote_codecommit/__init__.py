@@ -89,23 +89,20 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       * **RegionNotFound** if the url references a region that doesn't exist
       * **RegionNotAvailable** if the url references a region that is not available
     """
-    if remote_url is None:
-      raise FormatError('url required')
 
     url = urlparse(remote_url)
     event_handler = botocore.hooks.HierarchicalEmitter()
     profile = 'default'
     repository = url.netloc
     if not url.scheme or not url.netloc:
-      raise FormatError(f'{remote_url} is a malformed url')
+      raise FormatError('The following URL is malformed: {}. A URL must be in one of the two following formats: codecommit://<profile>@<repository> or codecommit::<region>://<profile>@<repository>'.format(remote_url))
 
     if '@' in url.netloc:
       profile, repository = url.netloc.split('@', 1)
       session = botocore.session.Session(profile = profile, event_hooks = event_handler)
 
       if profile not in session.available_profiles:
-        raise ProfileNotFound(f"Profile {profile} not found, available profiles are: {', '.join(session.available_profiles)}")
-
+        raise ProfileNotFound('The following profile was not found: {}. Available profiles are: {}. Either use one of the available profiles, or create an AWS CLI profile to use and then try again. For more information, see Configure an AWS CLI Profile in the AWS CLI User Guide.'.format(profile, ', '.join(session.available_profiles)))
     else:
       session = botocore.session.Session(event_hooks = event_handler)
 
@@ -130,24 +127,24 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       region = session.get_config_variable('region')
 
       if not region:
-        raise RegionNotFound(f"Profile {profile} doesn't have a region available. Please set it.")
+        raise RegionNotFound('The following profile does not have an AWS Region: {}. You must set an AWS Region for this profile. For more information, see Configure An AWS CLI Profile in the AWS CLI User Guide.'.format(profile))
 
       if region not in available_regions:
-        raise RegionNotAvailable(f'Region {region} is currently not available for use with AWS CodeCommit. Please try again with a valid region. If you believe this is an error then please update your version of botocore.')
+        raise RegionNotAvailable('The following AWS Region is not available for use with AWS CodeCommit: {}. For more information about CodeCommit\'s availability in AWS Regions, see the AWS CodeCommit User Guide. If an AWS Region is listed as supported but you receive this error, try updating your version of the AWS CLI or the AWS SDKs.'.format(region))
 
     elif re.match(r"^[a-z]{2}-\w*.*-\d{1}", url.scheme):
       if url.scheme in available_regions:
         region = url.scheme
 
       else:
-        raise RegionNotAvailable(f'Region {url.scheme} is currently not available for use with AWS CodeCommit. Please try again with a valid region. If you believe this is an error then please update your version of botocore.')
+        raise RegionNotAvailable('The following AWS Region is not available for use with AWS CodeCommit: {}. For more information about CodeCommit\'s availability in AWS Regions, see the AWS CodeCommit User Guide. If an AWS Region is listed as supported but you receive this error, try updating your version of the AWS CLI or the AWS SDKs.'.format(url.scheme))
 
     else:
-      raise FormatError(f'{remote_url} is a malformed url')
+      raise FormatError('The following URL is malformed: {}. A URL must be in one of the two following formats: codecommit://<profile>@<repository> or codecommit::<region>://<profile>@<repository>'.format(remote_url))
     credentials = session.get_credentials()
 
     if not credentials:
-      raise CredentialsNotFound(f"Profile {profile} doesn't have credentials available.")
+      raise CredentialsNotFound('The following profile does not have credentials configured: {}. You must configure the access key and secret key for the profile. For more information, see Configure an AWS CLI Profile in the AWS CLI User Guide.'.format(profile))
 
     return Context(session, repository, 'v1', region, credentials)
 
@@ -176,7 +173,7 @@ def main():
     authenticated_url = git_url(context.repository, context.version, context.region, context.credentials)
     sys.exit(subprocess.call(['git', 'remote-http', git_cmd, authenticated_url]))
 
-  except (FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound) as exc:
+  except (FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound, RegionNotAvailable) as exc:
     error(str(exc))
 
 
