@@ -193,14 +193,14 @@ def git_url(repository, version, region, credentials):
   :return: url we can push/pull from
   """
 
-  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', f'git-codecommit.{region}.amazonaws.com')
-  path = f'/{version}/repos/{repository}'
+  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.{}.amazonaws.com'.format(region))
+  path = '/{}/repos/{}'.format(version, repository)
 
   token = '%' + credentials.token if credentials.token else ''
   username = botocore.compat.quote(credentials.access_key + token, safe='')
   signature = sign(hostname, path, region, credentials)
 
-  return f'https://{username}:{signature}@{hostname}{path}'
+  return 'https://{}:{}@{}{}'.format(username, signature, hostname, path)
 
 
 def sign(hostname, path, region, credentials):
@@ -215,11 +215,11 @@ def sign(hostname, path, region, credentials):
   :return: signature for the url
   """
 
-  request = botocore.awsrequest.AWSRequest(method = 'GIT', url = f'https://{hostname}{path}')
+  request = botocore.awsrequest.AWSRequest(method = 'GIT', url = 'https://{}{}'.format(hostname, path))
   request.context['timestamp'] = datetime.datetime.utcnow().strftime('%Y%m%dT%H%M%S')
 
   signer = botocore.auth.SigV4Auth(credentials, 'codecommit', region)
-  canonical_request = f'GIT\n{path}\n\nhost:{hostname}\n\nhost\n'
+  canonical_request = 'GIT\n{}\n\nhost:{}\n\nhost\n'.format(path, hostname)
   string_to_sign = signer.string_to_sign(request, canonical_request)
   signature = signer.signature(string_to_sign, request)
-  return f"{request.context['timestamp']}Z{signature}"
+  return "{}Z{}".format(request.context['timestamp'], signature)
