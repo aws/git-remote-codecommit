@@ -1,5 +1,5 @@
 tox>=3.13.2,<4.0.0
-botocore>=1.10.4
+botocore>=1.13.45
 mock==3.0.5
 awscli>=1.16.200,<2.0.0
 flake8==3.7.8
