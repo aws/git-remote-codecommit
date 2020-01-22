@@ -11,7 +11,7 @@ CodeCommit <https://aws.amazon.com/codecommit/>`__. This package extends `git
   % cat ~/.aws/config
   [profile demo-profile]
   region = us-east-2
-  account = 111122223333
+  output = json
 
   % cat ~/.aws/credentials
   [demo-profile]
@@ -41,6 +41,7 @@ Before you can use *git-remote-codecommit*, you must:
   * `Attaching a policy to that user/role that allows access to AWS CodeCommit repositories <https://docs.aws.amazon.com/codecommit/latest/userguide/auth-and-access-control-iam-identity-based-access-control.html#managed-policies>`__
 
 * Create an AWS CodeCommit repository (or have one already) in your AWS account.
+* Install Python and its package manager, pip, if they are not already installed. To download and install the latest version of Python, `visit the Python website <https://www.python.org/>`__.
 * Install Git on your Linux, macOS, Windows, or Unix computer.
 * Install the latest version of the AWS CLI on your Linux, macOS, Windows, or Unix computer. You can find instructions `here <https://docs.aws.amazon.com/cli/latest/userguide/installing.html>`__.
 
