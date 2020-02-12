@@ -176,6 +176,10 @@ def main():
   except (FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound, RegionNotAvailable) as exc:
     error(str(exc))
 
+def website_domain_mapping(region):
+  if region in ['cn-north-1', 'cn-northwest-1']:
+    return 'amazonaws.com.cn'
+  return 'amazonaws.com'
 
 def git_url(repository, version, region, credentials):
   """
@@ -183,7 +187,7 @@ def git_url(repository, version, region, credentials):
 
   ::
 
-    https://(username):(password)@git-codecommit.(region).amazonaws.com/v1/repos/(repository)
+    https://(username):(password)@git-codecommit.(region).(website_domain)/v1/repos/(repository)
 
   :param str repository: repository name
   :param str version: protocol version for this hook
@@ -193,7 +197,7 @@ def git_url(repository, version, region, credentials):
   :return: url we can push/pull from
   """
 
-  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.{}.amazonaws.com'.format(region))
+  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.{}.{}'.format(region, website_domain_mapping(region)))
   path = '/{}/repos/{}'.format(version, repository)
 
   token = '%' + credentials.token if credentials.token else ''
