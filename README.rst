@@ -137,7 +137,8 @@ Getting Help
 ============
 We use GitHub issues for tracking bugs and feature requests and have limited bandwidth to address them. We recommend using the following community resources for getting help:
 
-* Check our existing troubleshooting `documentation <https://docs.aws.amazon.com/codecommit/latest/userguide/troubleshooting.html>`__ to see if your issue has been addressed there.
+* View the official setup steps for `HTTPS Connections to AWS CodeCommit with git-remote-codecommit <https://docs.aws.amazon.com/codecommit/latest/userguide/setting-up-git-remote-codecommit.html>`__.
+* Check our existing troubleshooting `documentation <https://docs.aws.amazon.com/codecommit/latest/userguide/troubleshooting-grc.html>`__ to see if your issue has been addressed there.
 * Open a support ticket with `AWS Support <https://console.aws.amazon.com/support/home#/>`__.
 * Check for an existing thread or start a new one on the `AWS CodeCommit forum <https://forums.aws.amazon.com/forum.jspa?forumID=189>`__.
 * If you believe that you have found a bug, please `open an issue <https://github.com/aws/git-remote-codecommit/issues>`__.
