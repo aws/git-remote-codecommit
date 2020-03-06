@@ -18,6 +18,8 @@ import subprocess
 import sys
 import re
 
+from botocore.credentials import JSONFileCache
+
 import botocore.auth
 import botocore.awsrequest
 import botocore.compat
@@ -105,6 +107,8 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
         raise ProfileNotFound('The following profile was not found: {}. Available profiles are: {}. Either use one of the available profiles, or create an AWS CLI profile to use and then try again. For more information, see Configure an AWS CLI Profile in the AWS CLI User Guide.'.format(profile, ', '.join(session.available_profiles)))
     else:
       session = botocore.session.Session(event_hooks = event_handler)
+
+    session.get_component('credential_provider').get_provider('assume-role').cache = JSONFileCache()
 
     try:
       # when the aws cli is available support plugin authentication

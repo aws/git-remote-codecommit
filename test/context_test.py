@@ -12,6 +12,7 @@
 # language governing permissions and limitations under the License.
 
 import botocore.credentials
+
 import functools
 import pytest
 
@@ -21,6 +22,12 @@ from mock import Mock, patch
 
 
 DEFAULT_CREDS = botocore.credentials.Credentials('access_key', 'secret_key', 'token')
+mock_assume_role = Mock(spec=botocore.credentials.AssumeRoleProvider)
+providers = {
+    'assume-role': mock_assume_role,
+}
+mock_resolver = Mock(spec=botocore.credentials.CredentialResolver)
+mock_resolver.get_provider = providers.get
 
 
 def get_available_regions(service, partition):
@@ -34,7 +41,7 @@ def get_available_partitions():
   return ['aws', 'aws-us-gov']
 
 
-def mock_session(region = None, available_profiles = None, credentials = DEFAULT_CREDS):
+def mock_session(region = None, available_profiles = None, credentials = DEFAULT_CREDS, resolver = mock_resolver):
 
   def decorator(func):
     session = Mock()
@@ -43,6 +50,8 @@ def mock_session(region = None, available_profiles = None, credentials = DEFAULT
     session.get_credentials.return_value = credentials
     session.get_available_partitions.return_value = get_available_partitions()
     session.get_available_regions.side_effect = get_available_regions
+    session.get_component.return_value = resolver
+
 
     @functools.wraps(func)
     def wrapped(*args, **kwargs):
@@ -170,3 +179,11 @@ def test_with_unset_region():
 def test_without_credentials():
   with pytest.raises(CredentialsNotFound):
     Context.from_url('codecommit://test_repo')
+
+
+@mock_session(available_profiles = ['profile'])
+def test_with_assume_role_provider():
+  context = Context.from_url('ca-central-1://profile@test_repo')
+  context.session.get_component.assert_called_with('credential_provider')
+  assert type(mock_assume_role.cache), botocore.JSONFileCache
+
