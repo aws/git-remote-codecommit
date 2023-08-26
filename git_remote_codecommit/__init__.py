@@ -31,6 +31,9 @@ try:
 except ImportError:
   from urllib.parse import urlparse  # python 3.x
 
+# For botocore_EndpointResolver
+import inspect
+from botocore.regions import EndpointResolver
 
 class FormatError(Exception):
   pass
@@ -174,18 +177,25 @@ def main():
 
   try:
     context = Context.from_url(remote_url)
-    authenticated_url = git_url(context.repository, context.version, context.region, context.credentials)
+    authenticated_url = git_url(context.session, context.repository, context.version, context.region, context.credentials)
     sys.exit(subprocess.call(['git', 'remote-http', git_cmd, authenticated_url]))
 
   except (FormatError, ProfileNotFound, RegionNotFound, CredentialsNotFound, RegionNotAvailable) as exc:
     error(str(exc))
 
-def website_domain_mapping(region):
-  if region in ['cn-north-1', 'cn-northwest-1']:
-    return 'amazonaws.com.cn'
-  return 'amazonaws.com'
+def botocore_EndpointResolver(service, session, region):
+  endpoints = session.get_component('data_loader').load_data('endpoints')
+  construct_endpoint_args = { "service_name": service, "region_name": region }
 
-def git_url(repository, version, region, credentials):
+  if 'use_dualstack_endpoint' in inspect.getfullargspec(EndpointResolver.construct_endpoint).args:
+    construct_endpoint_args["use_dualstack_endpoint"] = session.get_config_variable('use_dualstack_endpoint')
+
+  if 'use_fips_endpoint' in inspect.getfullargspec(EndpointResolver.construct_endpoint).args:
+    construct_endpoint_args["use_fips_endpoint"] = session.get_config_variable('use_fips_endpoint')
+
+  return EndpointResolver(endpoint_data=endpoints).construct_endpoint(**construct_endpoint_args)['hostname']
+
+def git_url(session, repository, version, region, credentials):
   """
   Provides the signed url we can use for pushing and pulling from CodeCommit...
 
@@ -201,7 +211,7 @@ def git_url(repository, version, region, credentials):
   :return: url we can push/pull from
   """
 
-  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.{}.{}'.format(region, website_domain_mapping(region)))
+  hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-{}'.format(botocore_EndpointResolver('codecommit', session, region)))
   path = '/{}/repos/{}'.format(version, repository)
 
   token = '%' + credentials.token if credentials.token else ''
