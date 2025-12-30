@@ -6,3 +6,4 @@ __pycache__
 /.eggs
 /dist
 /.python-version
+/.venv
