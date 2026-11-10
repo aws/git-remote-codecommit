@@ -125,7 +125,7 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
     except ImportError:
       pass
 
-    available_regions = [region for partition in session.get_available_partitions() for region in session.get_available_regions('codecommit', partition)]
+    available_regions = [region for partition in session.get_available_partitions() for region in session.get_available_regions('codecommit', partition)] + UNLISTED_REGIONS
 
     if url.scheme == 'codecommit':
       region = session.get_config_variable('region')
@@ -136,7 +136,7 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       if region not in available_regions:
         raise RegionNotAvailable('The following AWS Region is not available for use with AWS CodeCommit: {}. For more information about CodeCommit\'s availability in AWS Regions, see the AWS CodeCommit User Guide. If an AWS Region is listed as supported but you receive this error, try updating your version of the AWS CLI or the AWS SDKs.'.format(region))
 
-    elif re.match(r"^[a-z]{2}-\w*.*-\d{1}", url.scheme):
+    elif re.match(r"^[a-z]{2}-\w*.*-\d{1}", url.scheme) or url.scheme in UNLISTED_REGIONS:
       if url.scheme in available_regions:
         region = url.scheme
 
@@ -151,6 +151,11 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       raise CredentialsNotFound('The following profile does not have credentials configured: {}. You must configure the access key and secret key for the profile. For more information, see Configure an AWS CLI Profile in the AWS CLI User Guide.'.format(profile))
 
     return Context(session, repository, 'v1', region, credentials)
+
+
+# CodeCommit regions that botocore's endpoint data doesn't list for CodeCommit
+# yet, and whose names the region pattern above doesn't match.
+UNLISTED_REGIONS = ['eusc-de-east-1']
 
 
 def error(msg):
@@ -183,6 +188,8 @@ def main():
 def website_domain_mapping(region):
   if region in ['cn-north-1', 'cn-northwest-1']:
     return 'amazonaws.com.cn'
+  if region in ['eusc-de-east-1']:
+    return 'amazonaws.eu'
   return 'amazonaws.com'
 
 def git_url(repository, version, region, credentials):

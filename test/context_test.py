@@ -187,3 +187,21 @@ def test_with_assume_role_provider():
   context.session.get_component.assert_called_with('credential_provider')
   assert type(mock_assume_role.cache), botocore.JSONFileCache
 
+
+@mock_session(region = 'eusc-de-east-1')
+def test_with_eusc_region():
+  context = Context.from_url('codecommit://test_repo')
+  assert 'eusc-de-east-1' == context.region
+
+
+@mock_session(available_profiles = ['profile'])
+def test_with_eusc_region_in_url():
+  context = Context.from_url('eusc-de-east-1://profile@repo')
+  assert 'repo' == context.repository
+  assert 'eusc-de-east-1' == context.region
+
+
+@mock_session()
+def test_with_unknown_eusc_region_in_url():
+  with pytest.raises(FormatError):
+    Context.from_url('eusc-de-west-9://test_repo')

@@ -52,3 +52,10 @@ def test_git_url_with_token(dt_mock):
 def test_sign(dt_mock):
   dt_mock.utcnow = Mock(return_value = TIMESTAMP)
   assert EXPECTED_SIG == sign('git-codecommit.us-west-2.amazonaws.com', '/v1/repos/test_repo', REGION, CREDENTIAL)
+
+
+@patch('git_remote_codecommit.datetime.datetime', create = True)
+def test_git_url_eusc(dt_mock):
+  dt_mock.utcnow = Mock(return_value = TIMESTAMP)
+  url = git_url('test_repo', 'v1', 'eusc-de-east-1', CREDENTIAL)
+  assert url.endswith('@git-codecommit.eusc-de-east-1.amazonaws.eu/v1/repos/test_repo')
