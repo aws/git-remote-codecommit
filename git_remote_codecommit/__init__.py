@@ -204,6 +204,7 @@ def git_url(repository, version, region, credentials):
   hostname = os.environ.get('CODE_COMMIT_ENDPOINT', 'git-codecommit.{}.{}'.format(region, website_domain_mapping(region)))
   path = '/{}/repos/{}'.format(version, repository)
 
+  credentials = credentials.get_frozen_credentials()
   token = '%' + credentials.token if credentials.token else ''
   username = botocore.compat.quote(credentials.access_key + token, safe='')
   signature = sign(hostname, path, region, credentials)
