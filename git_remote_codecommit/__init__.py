@@ -100,7 +100,7 @@ class Context(collections.namedtuple('Context', ['session', 'repository', 'versi
       raise FormatError('The following URL is malformed: {}. A URL must be in one of the two following formats: codecommit://<profile>@<repository> or codecommit::<region>://<profile>@<repository>'.format(remote_url))
 
     if '@' in url.netloc:
-      profile, repository = url.netloc.split('@', 1)
+      profile, repository = url.netloc.rsplit('@', 1)
       session = botocore.session.Session(profile = profile, event_hooks = event_handler)
 
       if profile not in session.available_profiles:
