@@ -135,6 +135,19 @@ To specify an AWS Region different than the one in your profile, use the region 
 
   % git clone codecommit::us-east-1://demo-profile@MyRepositoryName
 
+Environment Variables
+---------------------
+When the profile or region is not explicitly specified in the URL, *git-remote-codecommit* respects standard AWS environment variables:
+
+* ``AWS_PROFILE``: Specifies the configuration profile to use when the URL does not embed a profile name (e.g. ``codecommit://MyRepositoryName``). This is useful for automation, CI/CD runners, or infrastructure tools (such as Terraform) where repository URLs should remain generic across environments:
+
+  ::
+
+    % AWS_PROFILE=demo-profile git clone codecommit://MyRepositoryName
+
+* ``AWS_DEFAULT_REGION`` or ``AWS_REGION``: Specifies the target AWS Region when not provided in the URL or profile configuration.
+* ``AWS_ACCESS_KEY_ID``, ``AWS_SECRET_ACCESS_KEY``, and ``AWS_SESSION_TOKEN``: Standard AWS credentials used to authenticate if not sourcing credentials from a configuration file.
+
 Getting Help
 ============
 We use GitHub issues for tracking bugs and feature requests and have limited bandwidth to address them. We recommend using the following community resources for getting help:
