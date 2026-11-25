@@ -19,7 +19,7 @@ setuptools.setup(
     author = 'Amazon Web Services',
     url = 'https://github.com/awslabs/git-remote-codecommit',
     license = 'Apache License 2.0',
-    install_requires = ['botocore >= 1.17.0'],
+    install_requires = ['botocore >= 1.29.75'],
     entry_points = {
         'console_scripts': [
             'git-remote-codecommit = git_remote_codecommit:main',
