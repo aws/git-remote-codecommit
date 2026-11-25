@@ -37,7 +37,7 @@ sso_registration_scopes = sso:account:access
 
 [profile cross-account]
 role_arn = arn:aws:iam::222222222222:role/CodeCommitAccess
-source_profile = cde-jump
+source_profile = jump
 region = eu-west-1
 """
 
